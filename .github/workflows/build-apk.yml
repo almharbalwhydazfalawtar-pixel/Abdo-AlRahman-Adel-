@@ -1,1 +1,41 @@
+name: Build Android APK
 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Extract Flutter project
+        run: |
+          unzip -o alrowad_app_starter.zip
+          cd alrowad_app
+          flutter create --platforms=android .
+
+      - name: Install dependencies
+        working-directory: alrowad_app
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: alrowad_app
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: alrowad-apk
+          path: alrowad_app/build/app/outputs/flutter-apk/app-release.apk
